@@ -14,7 +14,7 @@ Now, you can run the model with the following command.
 python swr.py
 ```
 
-The model assumes that the investor wishes to withdraw a constant amount each year for 30 years. Also, at the end of the 30 years, the investor desires to keep 100% of their principal intact. The model requires you to hardcode the current level Shiller PE ratio as well. To change these assumptions, you must modify the following variables.
+The model assumes that the investor wishes to withdraw a constant amount each year for 30 years. Also, it assumes that at the end of the 30 years, the investor desires to keep 100% of their initial principal intact. The model also requires you to hardcode the current Shiller PE ratio. To change these assumptions, you must modify the following variables in the file swr.py.
 ```
  t = 30
  residual = 1
