@@ -1,4 +1,3 @@
-import math
 import numpy as np
 import pandas as pd
 import statsmodels.api as sm
@@ -39,7 +38,7 @@ def main():
     df = df[df['cape'].notna()]
 
     t = 30
-    residual = 0
+    residual = 1
     current_cape = 37.5
 
     years = df['year'].tolist()
