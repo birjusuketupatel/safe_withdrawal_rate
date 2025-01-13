@@ -60,9 +60,9 @@ def main():
 
     plt.xlabel('Year')
     plt.ylabel('Percentage')
-    plt.title('Inflation Adjusted Safe Withdrawal Rate Over Time')
+    plt.title('Real Safe Withdrawal Rate Over Time')
 
-    plt.legend(['30 Year Safe Withdrawal Rate', 'Shiller CAPE Yield'])
+    plt.legend(['30 Year Safe Withdrawal Rate', 'Shiller Earnings Yield'])
 
     plt.xticks(np.arange(min(years), max(years) + 1, 10))
 
@@ -77,7 +77,7 @@ def main():
     plt.ylabel('Percentage')
     plt.title('Nominal Safe Withdrawal Rate Over Time')
 
-    plt.legend(['30 Year Safe Withdrawal Rate', 'Shiller CAPE Yield'])
+    plt.legend(['30 Year Safe Withdrawal Rate', 'Shiller Earnings Yield'])
 
     plt.xticks(np.arange(min(years), max(years)+1, 10))
 
@@ -139,9 +139,9 @@ def main():
     plt.scatter(x_test, y_r_test, color='orange', label='Test Points')
     plt.plot(x_pred, real_result.predict(x_pred_intercept), color='r', label='Regression Line')
     plt.fill_between(x_pred, real_low, real_upper, color='gray', alpha=0.3, label='Prediction Interval')
-    plt.axvline(x=current_cape_yield, color='red', linestyle='--', label='Current Shiller PE Yield')
+    plt.axvline(x=current_cape_yield, color='red', linestyle='--', label='Current Shiller Earnings Yield')
 
-    plt.xlabel('Shiller PE Yield')
+    plt.xlabel('Shiller Earnings Yield')
     plt.ylabel('r')
     plt.title('Regression Model, Real')
     plt.legend()
@@ -153,9 +153,9 @@ def main():
     plt.scatter(x_test, y_n_test, color='orange', label='Test Points')
     plt.plot(x_pred, nominal_result.predict(x_pred_intercept), color='r', label='Regression Line')
     plt.fill_between(x_pred, nominal_low, nominal_upper, color='gray', alpha=0.3, label='Prediction Interval')
-    plt.axvline(x=current_cape_yield, color='red', linestyle='--', label='Current Shiller PE Yield')
+    plt.axvline(x=current_cape_yield, color='red', linestyle='--', label='Current Shiller Earnings Yield')
 
-    plt.xlabel('Shiller PE Yield')
+    plt.xlabel('Shiller Earnings Yield')
     plt.ylabel('r')
     plt.title('Regression Model, Nominal')
     plt.legend()
