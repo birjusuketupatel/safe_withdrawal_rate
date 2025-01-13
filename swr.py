@@ -39,7 +39,7 @@ def main():
 
     t = 30
     residual = 1
-    current_cape = 37.5
+    current_cape = 37
 
     years = df['year'].tolist()
     cape = df['cape'].tolist()
@@ -64,7 +64,7 @@ def main():
 
     plt.legend(['30 Year Safe Withdrawal Rate', 'Shiller CAPE Yield'])
 
-    plt.xticks(np.arange(min(years), max(years)+1, 10))
+    plt.xticks(np.arange(min(years), max(years) + 1, 10))
 
     plt.show()
 
@@ -83,11 +83,10 @@ def main():
 
     plt.show()
 
-    # regress one over the real and nominal safe withdrawal rates on the CAPE ratio
-    real_swr = [1 / r for r in real_swr]
-    nominal_swr = [1 / r for r in nominal_swr]
-
-    x = np.array(cape)
+    # regress one over the real and nominal safe withdrawal rates on the CAPE yield
+    #real_swr = [1 / r for r in real_swr]
+    #nominal_swr = [1 / r for r in nominal_swr]
+    x = np.array(cape_yield)
     y_r = np.array(real_swr)
     y_n = np.array(nominal_swr)
 
@@ -100,8 +99,26 @@ def main():
     real_result = real_model.fit()
     nominal_result = nominal_model.fit()
 
+    # get test data to validate model
+    df_test = pd.read_csv('data/ftse_100_returns.csv')
+
+    cape_test = df_test['cape'].tolist()
+    nominal_test = df_test['nominal_return'].tolist()
+    real_test = df_test['real_return'].tolist()
+
+    real_swr_test = calc_swr(real_test, t, residual)
+    nominal_swr_test = calc_swr(nominal_test, t, residual)
+
+    cape_test = cape_test[:-t + 1]
+    cape_yield_test = [1 / x for x in cape_test]
+
+    x_test = np.array(cape_yield_test)
+    y_r_test = np.array(real_swr_test)
+    y_n_test = np.array(nominal_swr_test)
+
     # use models to establish prediction line and prediction interval
-    x_pred = np.linspace(min(current_cape - 3, min(x)), max(current_cape + 3, max(x)), 100)
+    current_cape_yield = 1 / current_cape
+    x_pred = np.linspace(min(current_cape_yield - 0.03, min(x)), max(current_cape_yield + 0.03, max(x)), 100)
     x_pred_intercept = sm.add_constant(x_pred)
 
     real_pred = real_result.get_prediction(x_pred_intercept)
@@ -119,12 +136,13 @@ def main():
     # plot data, regression line, and prediction interval
     plt.figure(figsize=(10, 6))
     plt.scatter(x, y_r, color='b', label='Data Points')
+    plt.scatter(x_test, y_r_test, color='orange', label='Test Points')
     plt.plot(x_pred, real_result.predict(x_pred_intercept), color='r', label='Regression Line')
     plt.fill_between(x_pred, real_low, real_upper, color='gray', alpha=0.3, label='Prediction Interval')
-    plt.axvline(x=current_cape, color='red', linestyle='--', label='Current Shiller PE')
+    plt.axvline(x=current_cape_yield, color='red', linestyle='--', label='Current Shiller PE Yield')
 
-    plt.xlabel('Shiller PE')
-    plt.ylabel('1/r')
+    plt.xlabel('Shiller PE Yield')
+    plt.ylabel('r')
     plt.title('Regression Model, Real')
     plt.legend()
 
@@ -132,12 +150,13 @@ def main():
 
     plt.figure(figsize=(10, 6))
     plt.scatter(x, y_n, color='b', label='Data Points')
+    plt.scatter(x_test, y_n_test, color='orange', label='Test Points')
     plt.plot(x_pred, nominal_result.predict(x_pred_intercept), color='r', label='Regression Line')
     plt.fill_between(x_pred, nominal_low, nominal_upper, color='gray', alpha=0.3, label='Prediction Interval')
-    plt.axvline(x=current_cape, color='red', linestyle='--', label='Current Shiller PE')
+    plt.axvline(x=current_cape_yield, color='red', linestyle='--', label='Current Shiller PE Yield')
 
-    plt.xlabel('Shiller PE')
-    plt.ylabel('1/r')
+    plt.xlabel('Shiller PE Yield')
+    plt.ylabel('r')
     plt.title('Regression Model, Nominal')
     plt.legend()
 
@@ -151,19 +170,19 @@ def main():
     print(nominal_result.summary())
 
     # calculate range of possible real and nominal safe withdrawal rates given today's Shiller PE
-    real_pred = real_result.get_prediction([1, current_cape])
-    nominal_pred = nominal_result.get_prediction([1, current_cape])
+    real_pred = real_result.get_prediction([1, current_cape_yield])
+    nominal_pred = nominal_result.get_prediction([1, current_cape_yield])
 
-    real_swr = 100 / real_pred.predicted_mean[0]
-    nominal_swr = 100 / nominal_pred.predicted_mean[0]
+    real_swr = 100 * real_pred.predicted_mean[0]
+    nominal_swr = 100 * nominal_pred.predicted_mean[0]
 
     real_summary = real_pred.summary_frame(alpha=0.32)
     nominal_summary = nominal_pred.summary_frame(alpha=0.32)
 
-    real_high = 100 / real_summary['obs_ci_lower'][0]
-    real_low = 100 / real_summary['obs_ci_upper'][0]
-    nominal_high = 100 / nominal_summary['obs_ci_lower'][0]
-    nominal_low = 100 / nominal_summary['obs_ci_upper'][0]
+    real_low  = 100 * real_summary['obs_ci_lower'][0]
+    real_high = 100 * real_summary['obs_ci_upper'][0]
+    nominal_low = 100 * nominal_summary['obs_ci_lower'][0]
+    nominal_high = 100 * nominal_summary['obs_ci_upper'][0]
 
     print('\nModel Projections:')
     print('\nNominal Model:')
